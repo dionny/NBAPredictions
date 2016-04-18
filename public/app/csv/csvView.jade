@@ -1,0 +1,14 @@
+div
+    div
+        span Paste JSON output from Mongo:
+    div
+        textarea.form-control(ng-model="json", rows=25)
+br
+div
+    div
+        span Save as (don't include an extension):
+    div
+        input.form-control(type="text", ng-model="fileName")
+br
+div
+    button.btn.btn-primary(ng-click="convertToCsv()") Convert to CSV
