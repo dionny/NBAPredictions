@@ -24,5 +24,8 @@
   },
   "devDependencies": {
     "mongodb": "^2.1.16"
+  },
+  "scripts": {
+    "csv": "node tools/convertJsonToCsv"
   }
 }
