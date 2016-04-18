@@ -3,14 +3,14 @@
  */
 var mongoose = require('mongoose');
 
-var Stat = mongoose.model('Stat',
+var StatArrest = mongoose.model('StatArrest',
     {
         player: String,
         name: String,
         position: String,
         height: Number,
         weight: Number,
-        birth: Number,
+        age: Number,
         forty: Number,
         bench: Number,
         vertical: Number,
@@ -21,7 +21,9 @@ var Stat = mongoose.model('Stat',
         college: String,
         start_year: Number,
         team: String,
-        touchdowns: Number
+        touchdowns: Number,
+        times_arrested: Number,
+        arrested: String
     });
 
-module.exports = Stat;
+module.exports = StatArrest;
