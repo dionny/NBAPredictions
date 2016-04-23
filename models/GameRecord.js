@@ -3,20 +3,19 @@
  */
 var mongoose = require('mongoose');
 
-var GameRecord = mongoose.model('GameRecord',
-    {
-            season: Number,
-            home: String,
-            visiting: String,
-            homeWLP: Number,
-            visitingWLP: Number,
-            homeDiff: Number,
-            visitingDiff: Number,
-            homeLast8WLP: Number,
-            visitingLast8WLP: Number,
-            visitingWLPAsVisitor: Number,
-            homeWLPAsHome: Number,
-            winningTeam: String
-    });
+var gameRecordSchema = new mongoose.Schema({
+    season: Number,
+    home: String,
+    visiting: String,
+    homeWLP: Number,
+    visitingWLP: Number,
+    homeDiff: Number,
+    visitingDiff: Number,
+    homeLast8WLP: Number,
+    visitingLast8WLP: Number,
+    visitingWLPAsVisitor: Number,
+    homeWLPAsHome: Number,
+    winningTeam: String
+});
 
-module.exports = GameRecord;
+module.exports = mongoose.model('gamerecord', gameRecordSchema);
