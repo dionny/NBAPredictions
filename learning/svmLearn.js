@@ -5,7 +5,7 @@ var Q = require('q');
 var svm = require('node-svm');
 var fs = require('fs');
 
-var trainingFile = 'datasets/' + jsonFile;
+var trainingFile = '../datasets/' + jsonFile;
 var trainedModelFile = trainingFile.replace('.json', '.trained.json');
 
 var clf = new svm.CSVC({
@@ -18,8 +18,9 @@ var clf = new svm.CSVC({
 });
 
 Q.all([
-    svm.read(trainingFile)
-]).spread(function (trainingSet) {
+    svm.read(trainingFile),
+    svm.read('../datasets/2015.json')
+]).spread(function (trainingSet, testSet) {
     return clf.train(trainingSet)
         .then(function (trainedModel) {
             // Save this model.
@@ -31,7 +32,7 @@ Q.all([
                 console.log('Persisted training model: ' + trainedModelFile);
             });
 
-            return clf.evaluate(trainingSet);
+            return clf.evaluate(testSet);
         });
 }).done(function (evaluationReport) {
     console.log('Accuracy against the test set:\n', so(evaluationReport));

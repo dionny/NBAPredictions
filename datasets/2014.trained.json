@@ -9982,7 +9982,7 @@
       "probability": false,
       "color": true,
       "interactive": true,
-      "cwd": "/Users/dionnys/Projects/NFLCrimes",
+      "cwd": "/Users/dionnys/Projects/NFLCrimes/learning",
       "mu": [
         0.4897098200354216,
         0.49598664403360465,
@@ -10065,20 +10065,20 @@
   },
   {
     "accuracy": 0.6723577235772358,
-    "fscore": 0.557628979143798,
-    "recall": 0.5215605749486653,
-    "precision": 0.5990566037735849,
+    "fscore": 0.5605234460196292,
+    "recall": 0.5277207392197125,
+    "precision": 0.5976744186046512,
     "class": {
       "0": {
-        "precision": 0.5990566037735849,
-        "recall": 0.5215605749486653,
-        "fscore": 0.557628979143798,
+        "precision": 0.5976744186046512,
+        "recall": 0.5277207392197125,
+        "fscore": 0.5605234460196292,
         "size": 487
       },
       "1": {
-        "precision": 0.7109181141439206,
-        "recall": 0.7711978465679677,
-        "fscore": 0.7398321497740478,
+        "precision": 0.7125,
+        "recall": 0.7671601615074024,
+        "fscore": 0.7388204795852236,
         "size": 743
       }
     },

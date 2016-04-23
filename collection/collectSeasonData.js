@@ -61,7 +61,7 @@ function get(headers, data, key) {
 }
 
 var seasons = [];
-for (var i = 2000; i < 2015; i++) {
+for (var i = 2000; i <= 2015; i++) {
     (function (e) {
         seasons.push(function (waterfallCallback) {
             var currentSeason = e;
@@ -329,7 +329,3 @@ for (var i = 2000; i < 2015; i++) {
 async.series(seasons, function (err, results) {
     mongoose.connection.close();
 });
-
-
-
-
