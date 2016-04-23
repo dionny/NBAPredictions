@@ -27,9 +27,9 @@ function train(identity, data) {
 
                 var clf = new svm.CSVC({
                     // gamma: [0.01],
-                    // c: [1],
+                    c: [1],
                     // gamma: [0.001, 0.01, 0.1, 0.2, 0.5, 0.8, 1.0, 1.5, 2.0, 5.0, 10.0, 100.0],
-                    c: [0.1, 0.5, 1, 2, 4, 5, 8, 10, 20, 30, 50, 100],
+                    // c: [0.1, 0.5, 1, 2, 4, 5, 8, 10, 20, 30, 50, 100],
                     kFold: data.length < 10 ? data.length : 10,
                     normalize: true,
                     reduce: true, // default value
@@ -66,18 +66,26 @@ function predict(identity, data) {
 
     async.waterfall([
             function (callback) {
-                Classifier.find({key: identity, type: 'svm'}, function (err, doc) {
+                Classifier.findOne({key: identity, type: 'svm'}, function (err, doc) {
                     if (err) {
                         callback(err);
                     } else {
-                        callback(null, JSON.parse(doc.data));
+                        if (!doc) {
+                            callback(null, null);
+                        } else {
+                            callback(null, JSON.parse(doc.toObject().data));
+                        }
                     }
                 });
             },
 
-            function (callback, model) {
-                var clf = svm.restore(model[0]);
-                callback(null, clf.predictSync(data));
+            function (model, callback) {
+                if (!model) {
+                    callback(null, 1);
+                } else {
+                    var clf = svm.restore(model[0]);
+                    callback(null, clf.predictSync(data[0]));
+                }
             }
         ],
         function (err, results) {

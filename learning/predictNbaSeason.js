@@ -10,71 +10,84 @@ var GameRecord = require('../models/GameRecord');
 
 mongoose.connect('mongodb://127.0.0.1:27017/NBAStats');
 
+function prepare(games) {
+    var output = [];
+    _.forEach(games, function (game) {
+        var vals = _.values(game);
+        var last = vals[vals.length - 1];
+        vals = vals.slice(0, vals.length - 1);
+
+        if (last === 'HOME') {
+            last = 1;
+        } else {
+            last = 0;
+        }
+
+        output.push([vals, last]);
+    });
+    return output;
+}
+
+function getGamesForSeason(season, callback) {
+    GameRecord.find({season: season}, {_id: 0, season: 0, home: 0, visiting: 0}, function (err, games) {
+        if (err) {
+            callback(err);
+        } else {
+            var mapped = _.map(games, function (game) {
+                return game.toObject();
+            });
+
+            callback(prepare(mapped));
+        }
+    });
+}
+
 function predictSeason(season) {
 
     async.waterfall([
-            // Get all the games for this season.
             function (callback) {
-                GameRecord.find({season: season}, {_id: 0, season: 0, home: 0, visiting: 0}, function (err, games) {
-                    if (err) {
-                        callback(err);
-                    } else {
-                        callback(null, _.map(games, function (game) {
-                            return game.toObject();
-                        }));
-                    }
+                getGamesForSeason(season, function (data) {
+                    callback(null, data);
                 });
             },
 
-            // Prepare training data.
-            function (games, callback) {
-                var output = [];
-                _.forEach(games, function (game) {
-                    var vals = _.values(game);
-                    var last = vals[vals.length - 1];
-                    vals = vals.slice(0, vals.length - 1);
-
-                    if (last === 'HOME') {
-                        last = 1;
-                    } else {
-                        last = 0;
-                    }
-
-                    output.push([vals, last]);
+            function (currentSeason, callback) {
+                getGamesForSeason(season - 1, function (data) {
+                    callback(null, currentSeason, data);
                 });
-                callback(null, output);
             },
 
             // Train on one game at a time.
-            function (games, waterfallCallback) {
+            function (currentSeason, lastSeason, waterfallCallback) {
                 var series = [];
-                var runningAccuracy = 0;
                 var timesRun = 0;
+                var timesCorrect = 0;
 
-                for (var i = 0; i < games.length; i++) {
+                for (var i = 0; i < currentSeason.length; i++) {
                     (function (e) {
-                        var gamesThusFar = games.slice(0, e);
-                        var thisGame = games[i];
+                        var gamesThusFar = lastSeason.concat(currentSeason.slice(0, e));
+                        var thisGame = currentSeason[i];
                         series.push(function (callback) {
 
                             svm.train(season, gamesThusFar).then(function (model) {
-                                var accuracy = 0;
-                                if (model && model.data) {
-                                    accuracy = JSON.parse(model.data)[1].accuracy;
-                                }
 
-                                timesRun++;
-                                runningAccuracy += accuracy;
-                                var avgAccuracy = runningAccuracy / timesRun;
+                                svm.predict(season, thisGame).then(function (prediction) {
 
-                                console.log('Season: %d, Training based on first %d games, Accuracy: %d, Avg: %d',
-                                    season,
-                                    gamesThusFar.length,
-                                    accuracy.toFixed(6),
-                                    avgAccuracy.toFixed(6));
+                                    timesRun++;
+                                    if (prediction === thisGame[1]) {
+                                        timesCorrect++;
+                                    }
 
-                                var prediction = svm.predict(season, thisGame);
-                                callback(null, prediction);
+                                    accuracy = (timesCorrect / timesRun).toFixed(6);
+
+                                    console.log('Season: %d, Training based on first %d games, Accuracy: %d',
+                                        season,
+                                        gamesThusFar.length,
+                                        accuracy);
+
+                                    callback(null, prediction);
+                                });
+
                             });
 
                         });
