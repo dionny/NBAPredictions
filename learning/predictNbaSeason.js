@@ -5,28 +5,11 @@
 var _ = require('lodash');
 var async = require('async');
 var mongoose = require('mongoose');
-var svm = require('../learning/svm');
+var SVMClassifier = require('../learning/classifiers/svm');
+var LinearClassifier = require('../learning/classifiers/linearRegression');
 var GameRecord = require('../models/GameRecord');
 
 mongoose.connect('mongodb://127.0.0.1:27017/NBAStats');
-
-function prepare(games) {
-    var output = [];
-    _.forEach(games, function (game) {
-        var vals = _.values(game);
-        var last = vals[vals.length - 1];
-        vals = vals.slice(0, vals.length - 1);
-
-        if (last === 'HOME') {
-            last = 1;
-        } else {
-            last = 0;
-        }
-
-        output.push([vals, last]);
-    });
-    return output;
-}
 
 function getGamesForSeason(season, callback) {
     GameRecord.find({season: season}, {_id: 0, season: 0, home: 0, visiting: 0}, function (err, games) {
@@ -37,7 +20,7 @@ function getGamesForSeason(season, callback) {
                 return game.toObject();
             });
 
-            callback(prepare(mapped));
+            callback(mapped);
         }
     });
 }
@@ -52,51 +35,39 @@ function predictSeason(season) {
             },
 
             function (currentSeason, callback) {
-                getGamesForSeason(season - 1, function (data) {
-                    callback(null, currentSeason, data);
+                getGamesForSeason(season - 1, function (lastSeason) {
+                    callback(null, currentSeason, lastSeason);
                 });
             },
 
             // Train on one game at a time.
             function (currentSeason, lastSeason, waterfallCallback) {
-                var series = [];
-                var timesRun = 0;
-                var timesCorrect = 0;
+                var svm = new SVMClassifier();
+                svm.load(currentSeason, lastSeason);
 
-                for (var i = 0; i < currentSeason.length; i++) {
-                    (function (e) {
-                        var gamesThusFar = lastSeason.concat(currentSeason.slice(0, e));
-                        var thisGame = currentSeason[i];
-                        series.push(function (callback) {
+                var lr = new LinearClassifier({
+                    algorithm: 'NormalEquation'
+                });
 
-                            svm.train(season, gamesThusFar).then(function (model) {
+                lr.load(currentSeason, lastSeason);
 
-                                svm.predict(season, thisGame).then(function (prediction) {
-
-                                    timesRun++;
-                                    if (prediction === thisGame[1]) {
-                                        timesCorrect++;
-                                    }
-
-                                    accuracy = (timesCorrect / timesRun).toFixed(6);
-
-                                    console.log('Season: %d, Training based on first %d games, Accuracy: %d',
-                                        season,
-                                        gamesThusFar.length,
-                                        accuracy);
-
-                                    callback(null, prediction);
-                                });
-
-                            });
-
+                async.parallel([
+                    function (callback) {
+                        lr.runSeason(season).then(function (results) {
+                            callback(null, results);
                         });
-                    })(i);
-                }
-
-                async.series(series, function (err, results) {
-                    console.log('done');
-                    waterfallCallback(null, results);
+                    },
+                    function (callback) {
+                        svm.runSeason(season).then(function (results) {
+                            callback(null, results);
+                        });
+                    }
+                ], function (err, results) {
+                    if (err) {
+                        waterfallCallback(err);
+                    } else {
+                        waterfallCallback(null, results);
+                    }
                 });
             }
         ],
@@ -112,7 +83,55 @@ function predictSeason(season) {
         });
 }
 
-predictSeason(2015);
+function predictGame(season, gameIndex) {
+
+    async.waterfall([
+            function (callback) {
+                getGamesForSeason(season, function (data) {
+                    callback(null, data);
+                });
+            },
+
+            function (currentSeason, callback) {
+                getGamesForSeason(season - 1, function (lastSeason) {
+                    lastSeason = lastSeason.slice(-100);
+                    callback(null, currentSeason, lastSeason);
+                });
+            },
+
+            // Train on one game at a time.
+            function (currentSeason, lastSeason, waterfallCallback) {
+                var svm = new SVMClassifier(currentSeason, lastSeason);
+
+                async.parallel([
+                    function (callback) {
+                        svm.runGame(season, gameIndex).then(function (results) {
+                            callback(null, results);
+                        });
+                    }
+                ], function (err, results) {
+                    if (err) {
+                        waterfallCallback(err);
+                    } else {
+                        waterfallCallback(null, results);
+                    }
+                });
+            }
+        ],
+
+        function (err, results) {
+            if (err) {
+                console.log(err);
+            } else {
+                // console.log(results);
+            }
+
+            mongoose.connection.close();
+        });
+}
+
+predictSeason(2014);
+// predictGame(2015, 100);
 
 module.exports = {
     predictSeason: predictSeason
