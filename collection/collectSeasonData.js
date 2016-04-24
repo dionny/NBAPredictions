@@ -280,7 +280,7 @@ for (var i = 2000; i <= 2015; i++) {
                             visitingLast8WLP: (visitingWinsLastNGames / visitingLastNGames.length) || 0,
                             visitingWLPAsVisitor: (visitingStats.winsAsVisitor / visitingStats.gamesAsVisitor) || 0,
                             homeWLPAsHome: (homeStats.winsAsHome / homeStats.gamesAsHome) || 0,
-                            winningTeam: game.winningTeam
+                            winningTeam: game.winningTeam === "HOME" ? 1 : 0
                         };
 
                         assert(currentRecord.home);
