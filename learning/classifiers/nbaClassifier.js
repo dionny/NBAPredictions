@@ -10,7 +10,7 @@ function NBAClassifier() {
 
     function load(currentSeason, lastSeason) {
         this.currentSeason = prepare(currentSeason);
-        this.lastSeason = prepare(lastSeason).slice(-this.lastSeasonIncludeAmount(lastSeason.length));
+        this.lastSeason = prepare(lastSeason);
         this.timesRun = 0;
         this.timesCorrect = 0;
         this.series = [];
@@ -54,7 +54,9 @@ function NBAClassifier() {
         var self = this;
         for (var i = 0; i < this.currentSeason.length; i++) {
             (function (e) {
-                var gamesThusFar = self.lastSeason.concat(self.currentSeason.slice(0, e));
+                var lastSeasonSlice = self.lastSeasonAmount(self.lastSeason.length, e);
+
+                var gamesThusFar = self.lastSeason.slice(-lastSeasonSlice).concat(self.currentSeason.slice(0, e));
                 var thisGame = self.currentSeason[i];
                 self.series.push(function (callback) {
 

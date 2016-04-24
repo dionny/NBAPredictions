@@ -10,8 +10,8 @@ function LinearClassifier(algorithm) {
         return "Linear Classifier";
     };
 
-    clf.lastSeasonIncludeAmount = function (lastSeasonLength) {
-        return 300;
+    clf.lastSeasonAmount = function (lastSeasonLength, currentSeasonLength) {
+        return 300 - currentSeasonLength / 4;
     };
 
     clf.train = function (identity, data) {
