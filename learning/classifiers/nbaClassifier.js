@@ -52,6 +52,7 @@ function NBAClassifier() {
     function runSeason(season) {
         var defer = q.defer();
         var self = this;
+        // for (var i = 0; i < 200; i++) {
         for (var i = 0; i < this.currentSeason.length; i++) {
             (function (e) {
                 var lastSeasonSlice = self.lastSeasonAmount(self.lastSeason.length, e);
@@ -65,19 +66,21 @@ function NBAClassifier() {
                         self.predict(season, model, thisGame).then(function (prediction) {
 
                             self.timesRun++;
-                            if (prediction === thisGame[1]) {
+                            if (prediction === self.getExampleLabel(thisGame)) {
                                 self.timesCorrect++;
                             }
 
                             accuracy = (self.timesCorrect / self.timesRun).toFixed(6);
 
-                            console.log('[%s] Predicting game: %d. Correct? %s -- Number of Predictions: %d. Correct Predictions: %d. Accuracy: %d',
-                                self.identifier(),
-                                (e + 1),
-                                prediction === thisGame[1] ? "Yes" : "No",
-                                self.timesRun,
-                                self.timesCorrect,
-                                accuracy);
+                            // if(e === self.currentSeason.length - 1) {
+                                console.log('[%s] Predicting game: %d. Correct? %s -- Number of Predictions: %d. Correct Predictions: %d. Accuracy: %d',
+                                    self.identifier(),
+                                    (e + 1),
+                                    prediction === self.getExampleLabel(thisGame) ? "Yes" : "No",
+                                    self.timesRun,
+                                    self.timesCorrect,
+                                    accuracy);
+                            // }
 
                             callback(null, prediction);
                         });

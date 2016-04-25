@@ -54,6 +54,10 @@ function LinearClassifier(algorithm) {
         return defer.promise;
     };
 
+    clf.getExampleLabel = function (game) {
+        return game[1];
+    };
+
     return clf;
 }
 
