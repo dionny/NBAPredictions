@@ -8,7 +8,7 @@ var mongoose = require('mongoose');
 var SVMClassifier = require('../learning/classifiers/svm');
 var LinearClassifier = require('../learning/classifiers/linearRegression');
 var WekaClassifier = require('../learning/classifiers/wekaClassifiers');
-var GameRecord = require('../models/GameRecord');
+var GameRecordForPrediction = require('../models/GameRecordForPrediction');
 var GamePrediction = require('../models/GamePrediction');
 
 mongoose.connect('mongodb://127.0.0.1:27017/NBAStats');
@@ -33,17 +33,18 @@ function findMajorityElement(arr, size) {
 }
 
 function getGamesForSeason(season, callback) {
-    GameRecord.find({season: season}, {_id: 0, season: 0, home: 0, visiting: 0}, function (err, games) {
-        if (err) {
-            callback(err);
-        } else {
-            var mapped = _.map(games, function (game) {
-                return game.toObject();
-            });
+    GameRecordForPrediction.find({season: season}, {_id: 0, season: 0, home: 0, visiting: 0, gameId: 0},
+        function (err, games) {
+            if (err) {
+                callback(err);
+            } else {
+                var mapped = _.map(games, function (game) {
+                    return game.toObject();
+                });
 
-            callback(mapped);
-        }
-    });
+                callback(mapped);
+            }
+        });
 }
 
 function predictSeason(season, group, finished) {
@@ -154,6 +155,7 @@ function predictSeason(season, group, finished) {
                                 prediction: prediction,
                                 actual: currentGame.winningTeam,
                                 gameIndex: i,
+                                gameId: currentGame.gameId,
                                 accuracy: accuracy,
                                 season: season
                             };
@@ -167,11 +169,11 @@ function predictSeason(season, group, finished) {
                             prediction.group = group;
                         });
 
-                        GamePrediction.remove({season: season}, function (err) {
+                        GamePrediction.remove({season: season, group: group}, function (err) {
                             GamePrediction.collection.insert(allPredictions, function (err) {
                                 waterfallCallback(null, results);
                             })
-                        })
+                        });
                     }
                 });
             }
@@ -234,11 +236,12 @@ function predictGame(season, gameIndex) {
         });
 }
 
-predictSeason(2011, 'original_data', function() {
-    predictSeason(2012, 'original_data', function() {
-        predictSeason(2013, 'original_data', function() {
-            predictSeason(2014, 'original_data', function() {
-                predictSeason(2015, 'original_data', function() {
+var group = 'original_data';
+predictSeason(2011, group, function () {
+    predictSeason(2012, group, function () {
+        predictSeason(2013, group, function () {
+            predictSeason(2014, group, function () {
+                predictSeason(2015, group, function () {
                     mongoose.connection.close();
                 });
             });

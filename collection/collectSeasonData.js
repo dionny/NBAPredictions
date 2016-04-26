@@ -270,6 +270,7 @@ for (var i = 2000; i <= 2015; i++) {
 
                         var currentRecord = {
                             season: currentSeason,
+                            gameId: game.id,
                             home: game.homeTeam,
                             visiting: game.visitingTeam,
                             homeWLP: (homeStats.wins / homeStats.gamesPlayed) || 0,

@@ -72,6 +72,7 @@ function NBAClassifier() {
                                 _.forEach(prediction, function (p) {
                                     p.actual = self.getExampleLabel(thisGame);
                                     p.gameIndex = e;
+                                    p.gameId = thisGame.gameId;
                                     p.season = season;
 
                                     // Get result object.
@@ -130,6 +131,7 @@ function NBAClassifier() {
                                     prediction: prediction,
                                     actual: self.getExampleLabel(thisGame),
                                     gameIndex: e,
+                                    gameId: thisGame.gameId,
                                     season: season,
                                     accuracy: accuracy
                                 };
