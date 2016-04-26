@@ -5,12 +5,12 @@ var NBAClassifier = require('../classifiers/nbaClassifier');
 var q = require('q');
 var fs = require('fs');
 
-function DecisionTreeClassifier() {
+function WekaClassifiers() {
     var clf = {};
     clf.__proto__ = NBAClassifier();
 
     clf.identifier = function () {
-        return "Decision Tree Classifier";
+        return "Weka Classifier";
     };
 
     clf.load = function (currentSeason, lastSeason) {
@@ -19,10 +19,11 @@ function DecisionTreeClassifier() {
         this.timesRun = 0;
         this.timesCorrect = 0;
         this.series = [];
+        this.results = {};
     };
 
     clf.lastSeasonAmount = function (lastSeasonLength, currentSeasonLength) {
-        return lastSeasonLength - currentSeasonLength * 0.4;
+        return lastSeasonLength - currentSeasonLength;
     };
 
     clf.train = function (identity, data) {
@@ -75,14 +76,32 @@ function DecisionTreeClassifier() {
                             defer.reject(data.toString());
                         });
 
+                        var predictions = [];
                         child.stdout.on('data', function (data) {
-                            var prediction = data.toString().trim();
-                            if (prediction === "0.0") {
-                                prediction = first;
-                            } else {
-                                prediction = opposite;
+                            var output = data.toString().trim().split(' ');
+                            var clf = output[0];
+                            if (clf !== "") {
+                                var prediction = output[1];
+
+                                if (prediction === "0.0") {
+                                    prediction = first;
+                                } else {
+                                    prediction = opposite;
+                                }
+
+                                if (clf.trim() === "") {
+                                    console.log('the fuck?');
+                                }
+
+                                predictions.push({
+                                    clf: clf,
+                                    prediction: prediction == "HOME" ? 1 : 0
+                                });
                             }
-                            defer.resolve(prediction == "HOME" ? 1 : 0);
+                        });
+
+                        child.on('exit', function (data) {
+                            defer.resolve(predictions);
                         });
                     }
                 });
@@ -99,4 +118,4 @@ function DecisionTreeClassifier() {
     return clf;
 }
 
-module.exports = DecisionTreeClassifier;
+module.exports = WekaClassifiers;

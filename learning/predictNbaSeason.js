@@ -7,9 +7,9 @@ var async = require('async');
 var mongoose = require('mongoose');
 var SVMClassifier = require('../learning/classifiers/svm');
 var LinearClassifier = require('../learning/classifiers/linearRegression');
-var KNNClassifier = require('../learning/classifiers/knn');
-var DecisionTreeClassifier = require('../learning/classifiers/wekaDecisionTree');
+var WekaClassifier = require('../learning/classifiers/wekaClassifiers');
 var GameRecord = require('../models/GameRecord');
+var GamePrediction = require('../models/GamePrediction');
 
 mongoose.connect('mongodb://127.0.0.1:27017/NBAStats');
 
@@ -46,7 +46,7 @@ function getGamesForSeason(season, callback) {
     });
 }
 
-function predictSeason(season) {
+function predictSeason(season, group) {
 
     async.waterfall([
             function (callback) {
@@ -63,63 +63,49 @@ function predictSeason(season) {
 
             // Train on one game at a time.
             function (currentSeason, lastSeason, waterfallCallback) {
-                // var svm = new SVMClassifier();
-                // svm.load(currentSeason, lastSeason);
-                //
-                // var lr = new LinearClassifier({
-                //     algorithm: 'NormalEquation'
-                // });
-                //
-                // lr.load(currentSeason, lastSeason);
-                //
+                var svm = new SVMClassifier();
+                svm.load(currentSeason, lastSeason);
+
+                var lr = new LinearClassifier({
+                    algorithm: 'NormalEquation'
+                });
+                lr.load(currentSeason, lastSeason);
+
                 // var knn = new KNNClassifier(40);
                 // knn.load(currentSeason, lastSeason);
 
-                var knnTests = [];
-                // for (var k = 1; k <= 10; k++) {
-                //     (function(e) {
-                //         knnTests.push(
-                //             function (callback) {
-                //                 var knn = new KNNClassifier(e);
-                //                 knn.load(currentSeason, lastSeason);
-                //                 knn.runSeason(season).then(function (results) {
-                //                     callback(null, results);
-                //                 });
-                //             }
-                //         );
-                //     })(k);
-                // }
+                var weka = new WekaClassifier();
+                weka.load(currentSeason, lastSeason);
 
-                var dt = new DecisionTreeClassifier();
-                dt.load(currentSeason, lastSeason);
-
-                knnTests = knnTests.concat([
+                var tests = [
                     function (callback) {
-                        dt.runSeason(season).then(function (results) {
+                        weka.runSeason(season).then(function (results) {
                             callback(null, results);
                         });
                     },
-                    // function (callback) {
-                    //     lr.runSeason(season).then(function (results) {
-                    //         callback(null, results);
-                    //     });
-                    // },
+                    function (callback) {
+                        lr.runSeason(season).then(function (results) {
+                            callback(null, results);
+                        });
+                    },
                     // function (callback) {
                     //     knn.runSeason(season).then(function (results) {
                     //         callback(null, results);
                     //     });
                     // },
-                    // function (callback) {
-                    //     svm.runSeason(season).then(function (results) {
-                    //         callback(null, results);
-                    //     });
-                    // }
-                ]);
+                    function (callback) {
+                        svm.runSeason(season).then(function (results) {
+                            callback(null, results);
+                        });
+                    }
+                ];
 
-                async.series(knnTests, function (err, results) {
+                async.series(tests, function (err, results) {
                     if (err) {
                         waterfallCallback(err);
+
                     } else {
+                        var ensemblePredictions = [];
 
                         var timesRun = 0;
                         var timesCorrect = 0;
@@ -128,14 +114,26 @@ function predictSeason(season) {
                         for (var i = 0; i < results[0].length; i++) {
                             var currentGame = currentSeason[i];
 
-                            var currentGamePredictions = _.map(results, function (clf) {
+                            var nestedPredictions = _.map(results, function (clf) {
                                 return clf[i];
+                            });
+
+                            var currentGamePredictions = [];
+                            _.forEach(nestedPredictions, function (p) {
+                                if (p.constructor === Array) {
+                                    var predictions = _.map(p, function (o) {
+                                        return o.prediction;
+                                    });
+                                    currentGamePredictions = currentGamePredictions.concat(predictions);
+                                } else {
+                                    currentGamePredictions.push(p);
+                                }
                             });
 
                             var prediction =
                                 findMajorityElement(currentGamePredictions, currentGamePredictions.length);
 
-                            if(prediction === currentGame.winningTeam) {
+                            if (prediction === currentGame.winningTeam) {
                                 timesCorrect++;
                             }
 
@@ -150,9 +148,30 @@ function predictSeason(season) {
                                 timesRun,
                                 timesCorrect,
                                 accuracy);
+
+                            prediction = {
+                                clf: "Ensemble",
+                                prediction: prediction,
+                                actual: currentGame.winningTeam,
+                                gameIndex: i,
+                                accuracy: accuracy,
+                                season: season
+                            };
+
+                            ensemblePredictions.push(prediction);
                         }
 
-                        waterfallCallback(null, results);
+                        var allPredictions = _.flattenDeep(results).concat(ensemblePredictions);
+
+                        _.forEach(allPredictions, function (prediction) {
+                            prediction.group = group;
+                        });
+
+                        GamePrediction.remove({season: season}, function (err) {
+                            GamePrediction.collection.insert(allPredictions, function (err) {
+                                waterfallCallback(null, results);
+                            })
+                        })
                     }
                 });
             }
@@ -216,7 +235,7 @@ function predictGame(season, gameIndex) {
         });
 }
 
-predictSeason(2014);
+predictSeason(2012, 'original_data');
 // predictGame(2015, 100);
 
 module.exports = {
