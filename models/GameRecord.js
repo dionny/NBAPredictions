@@ -4,6 +4,8 @@
 var mongoose = require('mongoose');
 
 var gameRecordSchema = new mongoose.Schema({
+    gameId: String,
+    date: String,
     season: Number,
     home: String,
     visiting: String,

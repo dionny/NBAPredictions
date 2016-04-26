@@ -6,6 +6,7 @@ var mongoose = require('mongoose');
 var Injury = mongoose.model('Injury',
     {
         date: String,
+        time: Number,
         team: String,
         name: String,
         status: String
