@@ -269,6 +269,8 @@ for (var i = 2000; i <= 2015; i++) {
                         }).length;
 
                         var currentRecord = {
+                            gameId: game.id,
+                            date: game.date,
                             season: currentSeason,
                             home: game.homeTeam,
                             visiting: game.visitingTeam,
