@@ -46,7 +46,7 @@ function getGamesForSeason(season, callback) {
     });
 }
 
-function predictSeason(season, group) {
+function predictSeason(season, group, finished) {
 
     async.waterfall([
             function (callback) {
@@ -182,9 +182,8 @@ function predictSeason(season, group) {
                 console.log(err);
             } else {
                 // console.log(results);
+                finished();
             }
-
-            mongoose.connection.close();
         });
 }
 
@@ -235,7 +234,17 @@ function predictGame(season, gameIndex) {
         });
 }
 
-predictSeason(2012, 'original_data');
+predictSeason(2011, 'original_data', function() {
+    predictSeason(2012, 'original_data', function() {
+        predictSeason(2013, 'original_data', function() {
+            predictSeason(2014, 'original_data', function() {
+                predictSeason(2015, 'original_data', function() {
+                    mongoose.connection.close();
+                });
+            });
+        });
+    });
+});
 // predictGame(2015, 100);
 
 module.exports = {

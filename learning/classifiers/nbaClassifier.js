@@ -55,8 +55,8 @@ function NBAClassifier() {
     function runSeason(season) {
         var defer = q.defer();
         var self = this;
-        // for (var i = 0; i < 10; i++) {
-        for (var i = 0; i < 2; i++) {
+        for (var i = 0; i < self.currentSeason.length; i++) {
+        // for (var i = 0; i < 2; i++) {
             (function (e) {
                 var lastSeasonSlice = self.lastSeasonAmount(self.lastSeason.length, e);
 
