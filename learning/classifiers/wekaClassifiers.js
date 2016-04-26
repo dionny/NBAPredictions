@@ -23,7 +23,7 @@ function WekaClassifiers() {
     };
 
     clf.lastSeasonAmount = function (lastSeasonLength, currentSeasonLength) {
-        return lastSeasonLength - currentSeasonLength;
+        return lastSeasonLength;
     };
 
     clf.train = function (identity, data) {

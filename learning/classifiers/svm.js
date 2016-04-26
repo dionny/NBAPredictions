@@ -13,7 +13,7 @@ function SVMClassifier() {
     };
 
     clf.lastSeasonAmount = function (lastSeasonLength, currentSeasonLength) {
-        return lastSeasonLength - currentSeasonLength / 4;
+        return lastSeasonLength;
     };
 
     clf.train = function (identity, data) {

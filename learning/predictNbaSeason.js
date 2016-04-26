@@ -236,7 +236,7 @@ function predictGame(season, gameIndex) {
         });
 }
 
-var group = 'original_data';
+var group = 'entire_last_season';
 predictSeason(2011, group, function () {
     predictSeason(2012, group, function () {
         predictSeason(2013, group, function () {
