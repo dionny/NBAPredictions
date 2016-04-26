@@ -1,14 +1,90 @@
-div
-    div
-        span Paste JSON output from Mongo:
-    div
-        textarea.form-control(ng-model="json", rows=25)
-br
-div
-    div
-        span Save as (don't include an extension):
-    div
-        input.form-control(type="text", ng-model="fileName")
-br
-div
-    button.btn.btn-primary(ng-click="convertToCsv()") Convert to CSV
+div(ng-if='seasons')
+    .form-inline
+        .form-group
+            label Choose season:
+            select(style="margin-left: 7px", ng-model='formData.chosenSeason', ng-options='season.label for season in seasons')
+    table.table.table-bordered.table-striped(ng-if="predictions")
+        thead
+            tr
+                td Game
+                td Winner
+                td KNN (K = 3)
+                td KNN (K = 5)
+                td KNN (K = 7)
+                td KNN (K = 15)
+                td KNN (K = 40)
+                td Linear Regression
+                td SVM
+                td J48
+                td LMT
+                td Naive Bayes
+                td AdaBoost
+                td Ensemble (Majority Vote)
+        tbody
+            tr(dir-paginate="p in predictions | itemsPerPage: 50")
+                td {{ p[0].gameIndex + 1 }}
+                td {{ p[0].actual }}
+
+                td
+                    i.glyphicon.glyphicon-ok(style="color: green;", ng-if="p[4].prediction == p[4].actual")
+                    i.glyphicon.glyphicon-remove(style="color: red;" ng-if="p[4].prediction != p[4].actual")
+                    label(style="margin-left: 5px;") {{ (p[4].accuracy * 100.00).toFixed(1) }}%
+
+                td
+                    i.glyphicon.glyphicon-ok(style="color: green;", ng-if="p[5].prediction == p[5].actual")
+                    i.glyphicon.glyphicon-remove(style="color: red;" ng-if="p[5].prediction != p[5].actual")
+                    label(style="margin-left: 5px;") {{ (p[5].accuracy * 100.00).toFixed(1) }}%
+
+                td
+                    i.glyphicon.glyphicon-ok(style="color: green;", ng-if="p[6].prediction == p[6].actual")
+                    i.glyphicon.glyphicon-remove(style="color: red;" ng-if="p[6].prediction != p[6].actual")
+                    label(style="margin-left: 5px;") {{ (p[6].accuracy * 100.00).toFixed(1) }}%
+
+                td
+                    i.glyphicon.glyphicon-ok(style="color: green;", ng-if="p[7].prediction == p[7].actual")
+                    i.glyphicon.glyphicon-remove(style="color: red;" ng-if="p[7].prediction != p[7].actual")
+                    label(style="margin-left: 5px;") {{ (p[7].accuracy * 100.00).toFixed(1) }}%
+
+                td
+                    i.glyphicon.glyphicon-ok(style="color: green;", ng-if="p[8].prediction == p[8].actual")
+                    i.glyphicon.glyphicon-remove(style="color: red;" ng-if="p[8].prediction != p[8].actual")
+                    label(style="margin-left: 5px;") {{ (p[7].accuracy * 100.00).toFixed(1) }}%
+
+                td
+                    i.glyphicon.glyphicon-ok(style="color: green;", ng-if="p[9].prediction == p[9].actual")
+                    i.glyphicon.glyphicon-remove(style="color: red;" ng-if="p[9].prediction != p[9].actual")
+                    label(style="margin-left: 5px;") {{ (p[9].accuracy * 100.00).toFixed(1) }}%
+
+                td
+                    i.glyphicon.glyphicon-ok(style="color: green;", ng-if="p[10].prediction == p[10].actual")
+                    i.glyphicon.glyphicon-remove(style="color: red;" ng-if="p[10].prediction != p[10].actual")
+                    label(style="margin-left: 5px;") {{ (p[10].accuracy * 100.00).toFixed(1) }}%
+
+                td
+                    i.glyphicon.glyphicon-ok(style="color: green;", ng-if="p[1].prediction == p[1].actual")
+                    i.glyphicon.glyphicon-remove(style="color: red;" ng-if="p[1].prediction != p[1].actual")
+                    label(style="margin-left: 5px;") {{ (p[1].accuracy * 100.00).toFixed(1) }}%
+
+                td
+                    i.glyphicon.glyphicon-ok(style="color: green;", ng-if="p[3].prediction == p[3].actual")
+                    i.glyphicon.glyphicon-remove(style="color: red;" ng-if="p[3].prediction != p[3].actual")
+                    label(style="margin-left: 5px;") {{ (p[3].accuracy * 100.00).toFixed(1) }}%
+
+                td
+                    i.glyphicon.glyphicon-ok(style="color: green;", ng-if="p[2].prediction == p[2].actual")
+                    i.glyphicon.glyphicon-remove(style="color: red;" ng-if="p[2].prediction != p[2].actual")
+                    label(style="margin-left: 5px;") {{ (p[2].accuracy * 100.00).toFixed(1) }}%
+
+                td
+                    i.glyphicon.glyphicon-ok(style="color: green;", ng-if="p[0].prediction == p[0].actual")
+                    i.glyphicon.glyphicon-remove(style="color: red;" ng-if="p[0].prediction != p[0].actual")
+                    label(style="margin-left: 5px;") {{ (p[0].accuracy * 100.00).toFixed(1) }}%
+
+                td
+                    i.glyphicon.glyphicon-ok(style="color: green;", ng-if="p[11].prediction == p[11].actual")
+                    i.glyphicon.glyphicon-remove(style="color: red;" ng-if="p[11].prediction != p[11].actual")
+                    label(style="margin-left: 5px;") {{ (p[11].accuracy * 100.00).toFixed(1) }}%
+
+           .col-md-12.no-padding(style="margin-left: -30px")
+               .col-md-8
+                   dir-pagination-controls(max-size="5", boundary-links="false", direction-links="true")

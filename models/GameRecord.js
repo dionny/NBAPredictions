@@ -17,7 +17,8 @@ var gameRecordSchema = new mongoose.Schema({
     visitingLast8WLP: Number,
     visitingWLPAsVisitor: Number,
     homeWLPAsHome: Number,
-    winningTeam: Number
+    winningTeam: Number,
+    gameId: String
 });
 
 module.exports = mongoose.model('gamerecord', gameRecordSchema);

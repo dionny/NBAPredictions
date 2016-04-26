@@ -5,7 +5,7 @@ var GameDataCollection = require('../collection/collectGameData.js');
 var game_data = new GameDataCollection();
 var mongoose = require('mongoose');
 var Stat = require('../models/Stat.js');
-mongoose.connect('mongodb://localhost/NFLCrimes');
+// mongoose.connect('mongodb://localhost/NFLCrimes');
 
 var method = PlayerCollection.prototype;
 

@@ -14,6 +14,9 @@ function NBAClassifier() {
         this.timesRun = 0;
         this.timesCorrect = 0;
         this.series = [];
+
+        // A classifier may spawn results from multiple underlying classifiers.
+        this.results = {};
     }
 
     function runGame(season, gameIndex) {
@@ -52,7 +55,8 @@ function NBAClassifier() {
     function runSeason(season) {
         var defer = q.defer();
         var self = this;
-        for (var i = 0; i < this.currentSeason.length; i++) {
+        for (var i = 0; i < self.currentSeason.length; i++) {
+        // for (var i = 0; i < 2; i++) {
             (function (e) {
                 var lastSeasonSlice = self.lastSeasonAmount(self.lastSeason.length, e);
 
@@ -64,26 +68,78 @@ function NBAClassifier() {
 
                         self.predict(season, model, thisGame).then(function (prediction) {
 
-                            self.timesRun++;
-                            if (prediction === thisGame[1]) {
-                                self.timesCorrect++;
+                            if (prediction.constructor === Array) {
+                                _.forEach(prediction, function (p) {
+                                    p.actual = self.getExampleLabel(thisGame);
+                                    p.gameIndex = e;
+                                    p.gameId = thisGame.gameId;
+                                    p.season = season;
+
+                                    // Get result object.
+                                    if (!self.results.hasOwnProperty(p.clf)) {
+                                        self.results[p.clf] = {
+                                            timesRun: 0,
+                                            timesCorrect: 0,
+                                            accuracy: 0
+                                        }
+                                    }
+
+                                    var result = self.results[p.clf];
+
+                                    result.timesRun++;
+                                    if (p.prediction === self.getExampleLabel(thisGame)) {
+                                        result.timesCorrect++;
+                                    }
+
+                                    result.accuracy = (result.timesCorrect / result.timesRun).toFixed(6);
+
+                                    // if (e === self.currentSeason.length - 1) {
+                                    console.log('[%s] Predicting game: %d. Correct? %s -- Number of Predictions: %d. Correct Predictions: %d. Accuracy: %d',
+                                        self.identifier() + " " + p.clf,
+                                        (e + 1),
+                                        p.prediction === self.getExampleLabel(thisGame) ? "Yes" : "No",
+                                        result.timesRun,
+                                        result.timesCorrect,
+                                        result.accuracy);
+                                    // }
+
+                                    p.accuracy = result.accuracy;
+                                });
+
+                                callback(null, prediction);
+
+                            } else {
+                                self.timesRun++;
+                                if (prediction === self.getExampleLabel(thisGame)) {
+                                    self.timesCorrect++;
+                                }
+
+                                accuracy = (self.timesCorrect / self.timesRun).toFixed(6);
+
+                                // if(e === self.currentSeason.length - 1) {
+                                console.log('[%s] Predicting game: %d. Correct? %s -- Number of Predictions: %d. Correct Predictions: %d. Accuracy: %d',
+                                    self.identifier(),
+                                    (e + 1),
+                                    prediction === self.getExampleLabel(thisGame) ? "Yes" : "No",
+                                    self.timesRun,
+                                    self.timesCorrect,
+                                    accuracy);
+                                // }
+
+                                prediction = {
+                                    clf: self.identifier(),
+                                    prediction: prediction,
+                                    actual: self.getExampleLabel(thisGame),
+                                    gameIndex: e,
+                                    gameId: thisGame.gameId,
+                                    season: season,
+                                    accuracy: accuracy
+                                };
+
+                                callback(null, prediction);
                             }
-
-                            accuracy = (self.timesCorrect / self.timesRun).toFixed(6);
-
-                            console.log('[%s] Predicting game: %d. Correct? %s -- Number of Predictions: %d. Correct Predictions: %d. Accuracy: %d',
-                                self.identifier(),
-                                (e + 1),
-                                prediction === thisGame[1] ? "Yes" : "No",
-                                self.timesRun,
-                                self.timesCorrect,
-                                accuracy);
-
-                            callback(null, prediction);
                         });
-
                     });
-
                 });
             })(i);
         }

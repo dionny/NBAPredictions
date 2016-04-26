@@ -7,25 +7,47 @@ var async = require('async');
 var mongoose = require('mongoose');
 var SVMClassifier = require('../learning/classifiers/svm');
 var LinearClassifier = require('../learning/classifiers/linearRegression');
-var GameRecord = require('../models/GameRecord');
+var WekaClassifier = require('../learning/classifiers/wekaClassifiers');
+var GameRecordForPrediction = require('../models/GameRecordForPrediction');
+var GamePrediction = require('../models/GamePrediction');
 
 mongoose.connect('mongodb://127.0.0.1:27017/NBAStats');
 
-function getGamesForSeason(season, callback) {
-    GameRecord.find({season: season}, {_id: 0, season: 0, home: 0, visiting: 0}, function (err, games) {
-        if (err) {
-            callback(err);
-        } else {
-            var mapped = _.map(games, function (game) {
-                return game.toObject();
-            });
-
-            callback(mapped);
-        }
-    });
+function findMajorityElement(arr, size) {
+    var count = 0, i, majorityElement;
+    for (i = 0; i < size; i++) {
+        if (count == 0)
+            majorityElement = arr[i];
+        if (arr[i] == majorityElement)
+            count++;
+        else
+            count--;
+    }
+    count = 0;
+    for (i = 0; i < size; i++)
+        if (arr[i] == majorityElement)
+            count++;
+    if (count > size / 2)
+        return majorityElement;
+    return -1;
 }
 
-function predictSeason(season) {
+function getGamesForSeason(season, callback) {
+    GameRecordForPrediction.find({season: season}, {_id: 0, season: 0, home: 0, visiting: 0, gameId: 0},
+        function (err, games) {
+            if (err) {
+                callback(err);
+            } else {
+                var mapped = _.map(games, function (game) {
+                    return game.toObject();
+                });
+
+                callback(mapped);
+            }
+        });
+}
+
+function predictSeason(season, group, finished) {
 
     async.waterfall([
             function (callback) {
@@ -48,25 +70,110 @@ function predictSeason(season) {
                 var lr = new LinearClassifier({
                     algorithm: 'NormalEquation'
                 });
-
                 lr.load(currentSeason, lastSeason);
 
-                async.parallel([
+                // var knn = new KNNClassifier(40);
+                // knn.load(currentSeason, lastSeason);
+
+                var weka = new WekaClassifier();
+                weka.load(currentSeason, lastSeason);
+
+                var tests = [
+                    function (callback) {
+                        weka.runSeason(season).then(function (results) {
+                            callback(null, results);
+                        });
+                    },
                     function (callback) {
                         lr.runSeason(season).then(function (results) {
                             callback(null, results);
                         });
                     },
+                    // function (callback) {
+                    //     knn.runSeason(season).then(function (results) {
+                    //         callback(null, results);
+                    //     });
+                    // },
                     function (callback) {
                         svm.runSeason(season).then(function (results) {
                             callback(null, results);
                         });
                     }
-                ], function (err, results) {
+                ];
+
+                async.series(tests, function (err, results) {
                     if (err) {
                         waterfallCallback(err);
+
                     } else {
-                        waterfallCallback(null, results);
+                        var ensemblePredictions = [];
+
+                        var timesRun = 0;
+                        var timesCorrect = 0;
+                        var accuracy = 0;
+
+                        for (var i = 0; i < results[0].length; i++) {
+                            var currentGame = currentSeason[i];
+
+                            var nestedPredictions = _.map(results, function (clf) {
+                                return clf[i];
+                            });
+
+                            var currentGamePredictions = [];
+                            _.forEach(nestedPredictions, function (p) {
+                                if (p.constructor === Array) {
+                                    var predictions = _.map(p, function (o) {
+                                        return o.prediction;
+                                    });
+                                    currentGamePredictions = currentGamePredictions.concat(predictions);
+                                } else {
+                                    currentGamePredictions.push(p);
+                                }
+                            });
+
+                            var prediction =
+                                findMajorityElement(currentGamePredictions, currentGamePredictions.length);
+
+                            if (prediction === currentGame.winningTeam) {
+                                timesCorrect++;
+                            }
+
+                            timesRun++;
+
+                            accuracy = (timesCorrect / timesRun).toFixed(6);
+
+                            console.log('[%s] Predicting game: %d. Correct? %s -- Number of Predictions: %d. Correct Predictions: %d. Accuracy: %d',
+                                "Ensemble",
+                                (i + 1),
+                                prediction === currentGame.winningTeam ? "Yes" : "No",
+                                timesRun,
+                                timesCorrect,
+                                accuracy);
+
+                            prediction = {
+                                clf: "Ensemble",
+                                prediction: prediction,
+                                actual: currentGame.winningTeam,
+                                gameIndex: i,
+                                gameId: currentGame.gameId,
+                                accuracy: accuracy,
+                                season: season
+                            };
+
+                            ensemblePredictions.push(prediction);
+                        }
+
+                        var allPredictions = _.flattenDeep(results).concat(ensemblePredictions);
+
+                        _.forEach(allPredictions, function (prediction) {
+                            prediction.group = group;
+                        });
+
+                        GamePrediction.remove({season: season, group: group}, function (err) {
+                            GamePrediction.collection.insert(allPredictions, function (err) {
+                                waterfallCallback(null, results);
+                            })
+                        });
                     }
                 });
             }
@@ -77,9 +184,8 @@ function predictSeason(season) {
                 console.log(err);
             } else {
                 // console.log(results);
+                finished();
             }
-
-            mongoose.connection.close();
         });
 }
 
@@ -130,7 +236,18 @@ function predictGame(season, gameIndex) {
         });
 }
 
-predictSeason(2014);
+var group = 'original_data';
+predictSeason(2011, group, function () {
+    predictSeason(2012, group, function () {
+        predictSeason(2013, group, function () {
+            predictSeason(2014, group, function () {
+                predictSeason(2015, group, function () {
+                    mongoose.connection.close();
+                });
+            });
+        });
+    });
+});
 // predictGame(2015, 100);
 
 module.exports = {
