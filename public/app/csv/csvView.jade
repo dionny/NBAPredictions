@@ -3,6 +3,8 @@ div(ng-if='seasons')
         .form-group
             label Choose season:
             select(style="margin-left: 7px", ng-model='formData.chosenSeason', ng-options='season.label for season in seasons')
+            label(style="margin-left: 7px") Choose data group:
+            select(style="margin-left: 7px", ng-model='formData.chosenGroup', ng-options='group.label for group in groups')
     table.table.table-bordered.table-striped(ng-if="predictions")
         thead
             tr

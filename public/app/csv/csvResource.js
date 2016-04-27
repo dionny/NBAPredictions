@@ -11,8 +11,12 @@ angular.module("app").factory("csvResource", function ($http) {
             return $http.get('/api/seasons');
         },
 
-        getPredictions: function(season) {
-            return $http.get('/api/predictions/' + season);
+        getGroups: function() {
+            return $http.get('/api/groups');
+        },
+
+        getPredictions: function(season, group) {
+            return $http.get('/api/predictions/' + season + '/' + group);
         }
     }
 });

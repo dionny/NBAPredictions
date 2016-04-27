@@ -5,13 +5,16 @@
 var _ = require('lodash');
 var async = require('async');
 var mongoose = require('mongoose');
+
+mongoose.connect('mongodb://127.0.0.1:27017/NBAStats', function (err) {
+    if (err) throw err;
+});
+
 var SVMClassifier = require('../learning/classifiers/svm');
 var LinearClassifier = require('../learning/classifiers/linearRegression');
 var WekaClassifier = require('../learning/classifiers/wekaClassifiers');
 var GameRecordForPrediction = require('../models/GameRecordForPrediction');
 var GamePrediction = require('../models/GamePrediction');
-
-mongoose.connect('mongodb://127.0.0.1:27017/NBAStats');
 
 function findMajorityElement(arr, size) {
     var count = 0, i, majorityElement;
@@ -33,12 +36,20 @@ function findMajorityElement(arr, size) {
 }
 
 function getGamesForSeason(season, callback) {
-    GameRecordForPrediction.find({season: season}, {_id: 0, season: 0, home: 0, visiting: 0, gameId: 0},
+    GameRecordForPrediction.find({season: season}, {_id: 0, season: 0, home: 0, visiting: 0, gameId: 0, date: 0},
         function (err, games) {
             if (err) {
                 callback(err);
             } else {
                 var mapped = _.map(games, function (game) {
+                    if (game.homeInjuries === 0) {
+                        game.homeInjuries = 0.01;
+                    }
+
+                    if (game.visitingInjuries === 0) {
+                        game.visitingInjuries = 0.01;
+                    }
+
                     return game.toObject();
                 });
 
@@ -68,7 +79,9 @@ function predictSeason(season, group, finished) {
                 svm.load(currentSeason, lastSeason);
 
                 var lr = new LinearClassifier({
-                    algorithm: 'NormalEquation'
+                    algorithm: 'GradientDescent',
+                    numberOfIterations: 10, // defaults to 8500
+                    learningRate: 0.8 // defaults to 0.1
                 });
                 lr.load(currentSeason, lastSeason);
 
@@ -131,8 +144,12 @@ function predictSeason(season, group, finished) {
                                 }
                             });
 
+                            var rawPredictions = _.map(currentGamePredictions, function (p) {
+                                return p.prediction;
+                            });
+
                             var prediction =
-                                findMajorityElement(currentGamePredictions, currentGamePredictions.length);
+                                findMajorityElement(rawPredictions, rawPredictions.length);
 
                             if (prediction === currentGame.winningTeam) {
                                 timesCorrect++;
@@ -236,7 +253,7 @@ function predictGame(season, gameIndex) {
         });
 }
 
-var group = 'entire_last_season';
+var group = 'injuries_all_last_season';
 predictSeason(2011, group, function () {
     predictSeason(2012, group, function () {
         predictSeason(2013, group, function () {

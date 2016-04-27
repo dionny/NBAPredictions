@@ -6,6 +6,7 @@ var _ = require('lodash');
 var async = require('async');
 var mongoose = require('mongoose');
 var GameRecord = require('../models/GameRecord.js');
+var InjuryReport = require('../models/InjuryReport');
 const assert = require('assert');
 
 mongoose.connect('mongodb://localhost/NBAStats');
@@ -56,12 +57,45 @@ var teamMapping = {
     "ORL": 1610612753
 };
 
+var teamAbbrev = {
+    "Hawks": "ATL",
+    "Celtics": "BOS",
+    "Nets": "BKN",
+    "Hornets": "CHA",
+    "Bulls": "CHI",
+    "Cavaliers": "CLE",
+    "Mavericks": "DAL",
+    "Nuggets": "DEN",
+    "Pistons": "DET",
+    "Warriors": "GSW",
+    "Rockets": "HOU",
+    "Pacers": "IND",
+    "Clippers": "LAC",
+    "Lakers": "LAL",
+    "Wizards": "WAS",
+    "Jazz": "UTA",
+    "Raptors": "TOR",
+    "Spurs": "SAS",
+    "Kings": "SAC",
+    "Trail Blazers": "POR",
+    "Suns": "PHX",
+    "76ers": "PHI",
+    "Grizzlies": "MEM",
+    "Heat": "MIA",
+    "Bucks": "MIL",
+    "Timerwolves": "MIN",
+    "Pelicans": "NOP",
+    "Knicks": "NYK",
+    "Thunder": "OKC",
+    "Magic": "ORL"
+};
+
 function get(headers, data, key) {
     return data[headers.indexOf(key)];
 }
 
 var seasons = [];
-for (var i = 2000; i <= 2015; i++) {
+for (var i = 2010; i <= 2015; i++) {
     (function (e) {
         seasons.push(function (waterfallCallback) {
             var currentSeason = e;
@@ -216,6 +250,17 @@ for (var i = 2000; i <= 2015; i++) {
                     });
                 },
                 function (callback) {
+                    InjuryReport.find({}, function (err, docs) {
+                        if (err) {
+                            callback(err);
+                        } else {
+                            callback(null, _.map(docs, function (d) {
+                                return d.toObject();
+                            }));
+                        }
+                    })
+                },
+                function (injuryData, callback) {
                     /*
                      1. Win-Loss Percentage (Visitor Team)
                      2. Win-Loss Percentage (Home Team)
@@ -268,12 +313,25 @@ for (var i = 2000; i <= 2015; i++) {
                             return o == 'W';
                         }).length;
 
+                        var homeInjuries = 0;
+                        var visitingInjuries = 0;
+
+                        _.forEach(_.filter(injuryData, {gameId: game.id}), function (i) {
+                            if (teamAbbrev[i.teamname.trim()] == game.homeTeam.trim()) {
+                                homeInjuries++;
+                            } else if (teamAbbrev[i.teamname.trim()] == game.visitingTeam.trim()) {
+                                visitingInjuries++;
+                            }
+                        });
+
                         var currentRecord = {
                             gameId: game.id,
                             date: game.date,
                             season: currentSeason,
                             gameId: game.id,
                             home: game.homeTeam,
+                            homeInjuries: homeInjuries,
+                            visitingInjuries: visitingInjuries,
                             visiting: game.visitingTeam,
                             homeWLP: (homeStats.wins / homeStats.gamesPlayed) || 0,
                             visitingWLP: (visitingStats.wins / visitingStats.gamesPlayed) || 0,

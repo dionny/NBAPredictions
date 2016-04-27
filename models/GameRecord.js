@@ -9,6 +9,8 @@ var gameRecordSchema = new mongoose.Schema({
     season: Number,
     home: String,
     visiting: String,
+    homeInjuries: Number,
+    visitingInjuries: Number,
     homeWLP: Number,
     visitingWLP: Number,
     homeDiff: Number,

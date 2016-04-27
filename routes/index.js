@@ -5,6 +5,7 @@ var assert = require('assert');
 var json2csv = require('json2csv');
 var mongoose = require('mongoose');
 var GamePrediction = require('../models/GamePrediction');
+var GameRecord = require('../models/GameRecord');
 var fs = require('fs');
 
 mongoose.connect('mongodb://127.0.0.1:27017/NBAStats');
@@ -30,21 +31,30 @@ router.post('/csv/:name', function (req, res, next) {
 });
 
 router.get('/api/seasons', function (req, res, next) {
-    return GamePrediction.find({}, "-_id season", function (err, docs) {
+    return GamePrediction.find().distinct('season', function (err, docs) {
         if (err) {
             res.send(err);
         } else {
-            res.json(_.sortBy(_.uniqBy(docs, function (d) {
-                return d.season;
-            }), function (d) {
-                return d.season;
-            }));
+            res.json(docs);
         }
     })
 });
 
-router.get('/api/predictions/:season', function (req, res, next) {
-    return GamePrediction.find({season: req.params.season}, "-_id -gameId -group", function (err, docs) {
+router.get('/api/groups', function (req, res, next) {
+    return GamePrediction.find().distinct('group', function (err, docs) {
+        if (err) {
+            res.send(err);
+        } else {
+            res.json(docs);
+        }
+    })
+});
+
+router.get('/api/predictions/:season/:group', function (req, res, next) {
+    return GamePrediction.find({
+        season: req.params.season,
+        group: req.params.group
+    }, "-_id -gameId -group", function (err, docs) {
         if (err) {
             res.send(err);
         } else {

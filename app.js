@@ -65,7 +65,7 @@ app.use(function (err, req, res, next) {
 });
 
 var config = {port: 6060};
-app.listen(config.port, function () {
+app.listen(config.port, '0.0.0.0', function () {
     console.log("Listening on port " + config.port + "...");
 });
 module.exports = app;
