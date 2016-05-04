@@ -118,20 +118,23 @@
 
         <!-- Approach -->
         <div class="featurette" id="approach">
-            <img class="featurette-image img-responsive pull-right" src="./img/system_architecture.png">
+            <!--<img class="featurette-image img-responsive pull-right" src="./img/system_architecture.png">-->
 
             <h2 class="featurette-heading">Approach</h2>
 
-            <p class="lead">Our approach, as shown in Fig 1 consisted in two basic steps: preprocessing the data and using several classification methods. Because of the length of the course we were not able to apply sequence pattern extraction or Markov Models, instead, we extracted the N-grams from each binary file, we calculated the information gain of each N-gram and selected the top 500 N-grams. </p>
-            <h3><span class="text-muted">Data Preprocessing</span></h3>
-            <p class="lead">We first extracted the N-grams, with n=4, using the kfNgram tool. The information gain was calculated using the average mutual information [Yang and Pederson, 1997].</p>
-            <img class="featurette-image img-responsive center-block" src="./img/info_gain.png">
-            <p class="lead">where <i>Ci</i> is the ith class, <i>vj</i> is the value of the jth attribute, <i>P(vj, Ci)</i> is the proportion that the jth attribute has the value <i>vj</i> in the class <i>Ci</i>, <i>P(vj)</i> is the proportion that the jth n-gram takes the value <i>vj</i> in the training data, and <i>P(Ci)</i> is the proportion of the training data belonging to the class <i>Ci</i> [Kolter and Maloof 2006].</p>
-            <p class="lead">Once the information gain <i>(IG)</i> was calculated we selected the top 500 N-grams with the highest <i>IG</i>. Then these 500 N-grams represented the boolean attributes where "true" means the N-gram is present in the malware file or "false" if absent. We scanned each file to determine which of the 500 N-grams selected were present and transformed the training set into .arff format in order to be read by Weka in the classification phase.</p>
+            <p class="lead">Our approach consisted in the following steps: collecting metrics, preprocessing the data, and using several classification methods. A considerable amount of time and effort was spent collecting new data for the latest NBA seasons, as well as collecting novel data such as player injury information.</p>
+            <h3><span class="text-muted">Data Collection</span></h3>
+            <p class="lead">Before a strategy for training and testing on classifiers could be devised, the relevant data had to be collected. The official API for raw NBA statistics is not free for developer, so an alternate data source was found at stats.nba.com/stats. It took a considerable amount of time to go over the API and filter out data that was not useful. The resulting data consisted of individual game statistics, information about active teams based on the year and information about individual players. In its original format, there was not much that could be done with the data for machine learning purposes, so other metrics were devised based on what was available.</p>
 
-            <h3><span class="text-muted">Classification</span></h3>
+            <p class="lead">One last feature that was included was player   injury count. Every team usually has one or two “star” players who on average perform better than the rest of their teammates. The presence of these players drive the performance of the whole team, so the outcome of a single game can be determined by whether or not the star players are present. It would be beneficial to know if any members of the current team are injured and cannot participate in a match. http://www.prosportstransactions.com/basketball/ provides details about when players are injured and when they recover, at which point they would once again be able to play. The data is presented in tables through html, but no api is provided. It would have been too time consuming to manually copy the necessary data from the site into the necessary formats. As such, a web crawler was developed that reads the data from the web pages, extracts relevant information and stores it in a database for later processing.</p>
 
-            <p class="lead">To assign the malware executables one of the nine families, we used Weka [Witten and Frank 2005] to run several classifiers. The algorithms used were: Decision Trees (J48), Naïve Bayes and Support Vector Machines (SVM), and also applied <i>"boosting"</i> and <i>"bagging"</i> to these classifiers.</p>
+            <h3><span class="text-muted">Preprocessing Data</span></h3>
+
+            <p class="lead">All of the collected data was preprocessed and aggregated into game records. A game record represents a real game in a season, and contains metrics leading p that game. Based on the research done by Torres et. al in "Prediction of NBA games based on Machine Learning Methods", we collected metrics based on some of the most useful team-centric metrics, such as average win/loss percentages for both teams participating in each game. We also needed to tie in the injury information into each game record. In summary, our preprocessors created game records such that all metrics (or features) took into account all games that were chronologically prior to the given game record. These game records were then labelled with the correct winning team.</p>
+
+            <h3><span class="text-muted">Classification and Validation</span></h3>
+
+            <p class="lead">In order to predict the outcome of a game, several machine learning algorithms were used: K-Nearest Neighbors, Linear Regression, Support Vector Machines, J48 Decision Tree, Logistic Model Tree, Naive Bayes, AdaBoost, and a custom majority vote ensemble. The performance of each algorithm was measured using 10-fold cross validation, and tuned accordingly.</p>
         </div>
 
         <hr class="featurette-divider">
@@ -149,6 +152,8 @@
             <p class="lead">As shown in the figures, the per-class accuracy of both methods was strongest for the linear SVM classifiers as well with the n-gram approach having all around better class accuracy results in general compared to the API strings method. We can attribute these findings to the fact that the API strings are not as unique a feature identifier as the n-grams.</p>
             <p class="lead">While the Rieck data set is comparable in size to the Microsoft data set, we achieved better accuracy and a better AUC measure. On average Rieck et al were only able to accurately classify 88% of their sample file [15], where we were able to correctly assign 98% to the proper malware family.</p>
         </div>
+
+        <p class="lead">All of the results across all used algorithms are available on our <a href="demo/demo.htm">demonstration</a> page.</p>
 
         <hr class="featurette-divider">
         
