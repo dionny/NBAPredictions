@@ -1,0 +1,28 @@
+group 'MachineLearning'
+version ''
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+// Include dependent libraries in archive.
+def mainClassName = "WekaTest"
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    compile 'nz.ac.waikato.cms.weka:weka-dev:3.7.13'
+}
+
+jar {
+    manifest {
+        attributes "Main-Class": "$mainClassName"
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>NBA Game Prediction</title>
+
+    <!-- Bootstrap Core CSS - Uses Bootswatch Flatly Theme: http://bootswatch.com/flatly/ -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="css/freelancer.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="http://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+    <link href="http://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body id="page-top" class="index">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#page-top"></a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="hidden">
+                        <a href="#page-top"></a>
+                    </li>
+                    <li class="page-scroll">
+                        <a href="#introduction">Introduction</a>
+                    </li>
+                    <li class="page-scroll">
+                        <a href="#related">Related work</a>
+                    </li>
+                    <li class="page-scroll">
+                        <a href="#approach">Approach</a>
+                    </li>
+                    <li class="page-scroll">
+                        <a href="#results">Results</a>
+                    </li>
+                    <li class="page-scroll">
+                        <a href="#conclusions">Conclusions</a>
+                    </li>
+                    <li class="page-scroll">
+                        <a href="demo/demo.htm">Demo</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container-fluid -->
+    </nav>
+
+    <!-- Full Width Image Header -->
+    <header>
+        <div>
+            <div class="container">
+                <h2>NBA game prediction based on historical data and injuries</h2>
+                <h4>CAP 5610 - Machine Learning</h4>
+                <h4>Prof. Ruogu Fang</h4>
+                <h4>Team members: Gregory Jean-Baptiste, Xuejiao Liu, Dionny Santiago</h4>
+            </div>
+        </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="container">
+
+        <hr class="featurette-divider">
+
+        <!-- First Featurette -->
+        <div class="featurette" id="introduction">
+            <h2 class="featurette-heading">Introduction</h2>
+
+            <p class="lead">Basketball is one the most popular games in the United States and also has much popularity abroad. It began as a simple gym exercise in the late 1800’s and slowly moved from high schools and into colleges. Finally, in the early 1950’s, the National Basketball Association (NBA) emerged as a major governing body of the professional version of the game. Ever since, the NBA has presided over a yearly tournament between official professional teams from all over North America. The annual tournament is called a season. During a season, each team competes against others several times and track their wins and losses. After a number of games (in the hundreds), the 16 teams with the most wins compete against each other in an elimination style tournament called the Playoffs. Playoff matches are best four out of seven. The team that wins the Playoffs win the whole season. 
+            </p>
+            <p class="lead">Our goal in this project is to attempt predicting the outcome of Basketball matches before they happen based on the characteristics of the two teams that are competing. While this may not be something that will benefit humanity in a great way, there a still some interesting applications of such predictions. For example, fantasy basketball is a virtual game where players can create teams based on real players and earn ranking based on the performance of their selected basketball players in real life. It may be beneficial for them to be able to predict how various teams will do and pick real players based on that. Fantasy Basketball, and fantasy sports in general generate millions a year.</p>
+        </div>
+
+        <hr class="featurette-divider">
+
+        <!-- Related work -->
+        <div class="featurette" id="related">
+            <h2 class="featurette-heading">Related work</h2>
+            <p class="lead">In "Semantics-aware malware detection" [Christodorescu et. al. 2005] the goal is to detect if a program exhibits a specified malicious behavior by determining if a set of templates of sequence of instructions are present in the executable files. This approach requires to have knowledge on semantics of each of the malware families, which is very expensive because implies having researchers investigating the malware behaviors.</p>
+            <p class="lead">In "Proposal of n-gram based algorithm for malware classification." [Pekta et. al. 2011] instead of byte sequences, the n-grams extracted are formed by machine codes. Centroids are formed using the most frequent N-grams. This could lead to choose N-grams irrelevants to the malware family.</p>
+            <p class="lead">We explored several other approaches, for example: "Malware classification using n-grams sequential pattern features" [Sornil et. al. 2013] and "Learning to detect and classify malicious executables in the wild" [Kolter and Maloof, 2006] but we chose to follow a similar methodology than the later because of the duration of the project.</p>
+        </div>
+
+        <hr class="featurette-divider">
+
+        <!-- Approach -->
+        <div class="featurette" id="approach">
+            <img class="featurette-image img-responsive pull-right" src="./img/system_architecture.png">
+
+            <h2 class="featurette-heading">Approach</h2>
+
+            <p class="lead">Our approach, as shown in Fig 1 consisted in two basic steps: preprocessing the data and using several classification methods. Because of the length of the course we were not able to apply sequence pattern extraction or Markov Models, instead, we extracted the N-grams from each binary file, we calculated the information gain of each N-gram and selected the top 500 N-grams. </p>
+            <h3><span class="text-muted">Data Preprocessing</span></h3>
+            <p class="lead">We first extracted the N-grams, with n=4, using the kfNgram tool. The information gain was calculated using the average mutual information [Yang and Pederson, 1997].</p>
+            <img class="featurette-image img-responsive center-block" src="./img/info_gain.png">
+            <p class="lead">where <i>Ci</i> is the ith class, <i>vj</i> is the value of the jth attribute, <i>P(vj, Ci)</i> is the proportion that the jth attribute has the value <i>vj</i> in the class <i>Ci</i>, <i>P(vj)</i> is the proportion that the jth n-gram takes the value <i>vj</i> in the training data, and <i>P(Ci)</i> is the proportion of the training data belonging to the class <i>Ci</i> [Kolter and Maloof 2006].</p>
+            <p class="lead">Once the information gain <i>(IG)</i> was calculated we selected the top 500 N-grams with the highest <i>IG</i>. Then these 500 N-grams represented the boolean attributes where "true" means the N-gram is present in the malware file or "false" if absent. We scanned each file to determine which of the 500 N-grams selected were present and transformed the training set into .arff format in order to be read by Weka in the classification phase.</p>
+
+            <h3><span class="text-muted">Classification</span></h3>
+
+            <p class="lead">To assign the malware executables one of the nine families, we used Weka [Witten and Frank 2005] to run several classifiers. The algorithms used were: Decision Trees (J48), Naïve Bayes and Support Vector Machines (SVM), and also applied <i>"boosting"</i> and <i>"bagging"</i> to these classifiers.</p>
+        </div>
+
+        <hr class="featurette-divider">
+
+        <!-- Results -->
+        <div class="featurette" id="results">
+            <h2 class="featurette-heading">Results</h2>
+
+            <img class="featurette-image img-responsive" src="./img/results_table.png">
+
+            <p class="lead">The results of our evaluation will show how the feature extraction methods outlined in the Kolter paper and the family classification methods in the Rieck paper are scaled, and how we replicated and improved upon their results. We had the most success with the accuracy of the SVMs for both the API strings and the n-gram feature sets. The error-rate analysis, AUC, precision and recall had the best results for both of these feature sets.</p>
+
+            <img class="featurette-image img-responsive pull-left" src="./img/class_accuracy_api-strings.png">
+            <img class="featurette-image img-responsive pull-left" src="./img/class_accuracy_n-grams.png">
+            <p class="lead">As shown in the figures, the per-class accuracy of both methods was strongest for the linear SVM classifiers as well with the n-gram approach having all around better class accuracy results in general compared to the API strings method. We can attribute these findings to the fact that the API strings are not as unique a feature identifier as the n-grams.</p>
+            <p class="lead">While the Rieck data set is comparable in size to the Microsoft data set, we achieved better accuracy and a better AUC measure. On average Rieck et al were only able to accurately classify 88% of their sample file [15], where we were able to correctly assign 98% to the proper malware family.</p>
+        </div>
+
+        <hr class="featurette-divider">
+        
+        <!-- Conclusions -->
+        <div class="featurette" id="conclusions">
+         
+            <h2 class="featurette-heading">Conclusion</h2>
+            <p class="lead">We presented a methodology for classifying malware binary files into nine families. The initial approach for the project was to extract the API libraries used in each file and make them the features in the classification models. But another approach was taken, using N-grams from the binary files. We described process of extracting N-grams, with n=4, from the executable files, then calculate the information gain (IG) of each of them in order to select the top 500 N-grams with the highest IG. We described how to preprocess the large data set in reasonable time, and how to transform it into .arff format to use it as input in Weka. We used several classifiers (Decision Trees, SVM and Naive Bayes) and compared the results to the ones obtained using API libraries. Our classification algorithms in Weka reached about 98% of accuracy, better than the API libraries. But we proposed in a future work, to use sequential pattern extraction or Markov Model which intuitively should lead to better results. We were able to process such large data set by optimizing the merging of N-grams using a min-heap, but for larger data sets we would recommend a distributed computing approach by using Hadoop or some other tool that facilitates map-reduce. We consider this methodology could be interpreted as a starting point in this topic of classifying malicious software into families, and later evolve into a more complex and robust solution by applying more sophisticated techniques and algorithms.</p>
+        </div>
+
+        <hr class="featurette-divider">
+
+        <!-- References -->
+        <div class="featurette" id="references">
+            <h2 class="featurette-heading">References</h2>
+            <p class="lead">Mihai Christodorescu, Somesh Jha, Sanjit A. Seshia, Dawn Song, and Randal E. Bryant. 2005. Semantics-Aware Malware Detection. (2005), 32–46.</p>
+            <p class="lead">William H. Fletcher. 2012. Data mining: Practical machine learning tools and techniques. (2012). http://kwicfinder.com/kfNgram/kfNgramHelp.html</p>
+            <p class="lead">J. Zico Kolter and Marcus A. Maloof. 2006. Learning to Detect and Classify Malicious Executables in the Wild. 7, Article 19 (2006), 2721–2744.</p>
+            <p class="lead">Abdurrahman Pekta, Mehmet Eri, and Tankut Acarman. 2011. Proposal of n-gram Based Algorithm for Malware Classification. (2011).</p>
+            <p class="lead">Ohm Sornil and Chatchai Liangboonprakong. 2013. Malware Classification Using N-grams Sequential Pattern Features. (2013).</p>
+            <p class="lead">I. H. Witten and E. Frank. 2005. Data mining: Practical machine learning tools and techniques. (2005). http://www.cs.waikato.ac.nz/ml/weka/index.html</p>
+            <p class="lead">Y. Yang and J. O. Pederson. 1997. A comparative study on feature selection in text categorization. (1997), 412–420.</p>
+            <p class="lead">N. Zhong, Y. Li, and S. T. Wu. 2012. Effective Pattern Discovery for Text Mining. 24, Issue 1 (2012), 30–44.</p>
+        </div>
+        
+        <!-- Footer -->
+        <footer>
+            <div class="row">
+                <div class="col-lg-12">
+                    <p>Florida International University</p>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+    <!-- /.container -->
+
+    <!-- jQuery -->
+    <script src="js/jquery.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+
+    <!-- Plugin JavaScript -->
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
+    <script src="js/classie.js"></script>
+    <script src="js/cbpAnimatedHeader.js"></script>
+
+    <!-- Contact Form JavaScript -->
+    <script src="js/jqBootstrapValidation.js"></script>
+    <script src="js/contact_me.js"></script>
+
+    <!-- Custom Theme JavaScript -->
+    <script src="js/freelancer.js"></script>
+
+</body>
+
+</html>

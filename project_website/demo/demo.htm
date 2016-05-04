@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Freelancer - Start Bootstrap Theme</title>
+
+    <!-- Custom CSS -->
+    <link href="css/freelancer.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="js/style.css">
+
+    <link rel="stylesheet" href="http:///maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="http://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+    <link href="http://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet"
+          type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body id="page-top" class="index">
+
+<!-- Navigation -->
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#page-top"></a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right">
+                <li class="hidden">
+                    <a href="#page-top"></a>
+                </li>
+                <li class="page-scroll">
+                    <a href="../index.html#introduction">Introduction</a>
+                </li>
+                <li class="page-scroll">
+                    <a href="../index.html#related">Related work</a>
+                </li>
+                <li class="page-scroll">
+                    <a href="../index.html#approach">Approach</a>
+                </li>
+                <li class="page-scroll">
+                    <a href="../index.html#results">Results</a>
+                </li>
+                <li class="page-scroll">
+                    <a href="../index.html#conclusions">Conclusions</a>
+                </li>
+                <li class="page-scroll">
+                    <a href="#">Demo</a>
+                </li>
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container-fluid -->
+</nav>
+<div ng-app="app" ui-view="ui-view" ng-controller="csvCtrl" ng-cloak>
+    <h1>NBA Game Prediction</h1>
+    <p>Team: 3 Nearest Neighbors</p>
+    <div ng-if="seasons">
+        <div class="form-inline">
+            <div class="form-group">
+                <label>Choose season:</label>
+                <select style="margin-left: 7px" ng-model="formData.chosenSeason"
+                        ng-options="season.label for season in seasons"></select>
+                <label style="margin-left: 7px">Choose data group:</label>
+                <select style="margin-left: 7px" ng-model="formData.chosenGroup"
+                        ng-options="group.label for group in groups"></select>
+            </div>
+        </div>
+        <table ng-if="predictions" class="table table-bordered table-striped">
+            <thead>
+            <tr>
+                <td>Game</td>
+                <td>Winner</td>
+                <td>KNN (K = 3)</td>
+                <td>KNN (K = 5)</td>
+                <td>KNN (K = 7)</td>
+                <td>KNN (K = 15)</td>
+                <td>KNN (K = 40)</td>
+                <td>Linear Regression</td>
+                <td>SVM</td>
+                <td>J48</td>
+                <td>LMT</td>
+                <td>Naive Bayes</td>
+                <td>AdaBoost</td>
+                <td>Ensemble (Majority Vote)</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr dir-paginate="p in predictions | itemsPerPage: 50">
+                <td>{{ p[0].gameIndex + 1 }}</td>
+                <td>{{ p[0].actual }}</td>
+                <td><i style="color: green;" ng-if="p[4].prediction == p[4].actual"
+                       class="glyphicon glyphicon-ok"></i><i style="color: red;" ng-if="p[4].prediction != p[4].actual"
+                                                             class="glyphicon glyphicon-remove"></i>
+                    <label style="margin-left: 5px;">{{ (p[4].accuracy * 100.00).toFixed(1) }}%</label>
+                </td>
+                <td><i style="color: green;" ng-if="p[5].prediction == p[5].actual"
+                       class="glyphicon glyphicon-ok"></i><i style="color: red;" ng-if="p[5].prediction != p[5].actual"
+                                                             class="glyphicon glyphicon-remove"></i>
+                    <label style="margin-left: 5px;">{{ (p[5].accuracy * 100.00).toFixed(1) }}%</label>
+                </td>
+                <td><i style="color: green;" ng-if="p[6].prediction == p[6].actual"
+                       class="glyphicon glyphicon-ok"></i><i style="color: red;" ng-if="p[6].prediction != p[6].actual"
+                                                             class="glyphicon glyphicon-remove"></i>
+                    <label style="margin-left: 5px;">{{ (p[6].accuracy * 100.00).toFixed(1) }}%</label>
+                </td>
+                <td><i style="color: green;" ng-if="p[7].prediction == p[7].actual"
+                       class="glyphicon glyphicon-ok"></i><i style="color: red;" ng-if="p[7].prediction != p[7].actual"
+                                                             class="glyphicon glyphicon-remove"></i>
+                    <label style="margin-left: 5px;">{{ (p[7].accuracy * 100.00).toFixed(1) }}%</label>
+                </td>
+                <td><i style="color: green;" ng-if="p[8].prediction == p[8].actual"
+                       class="glyphicon glyphicon-ok"></i><i style="color: red;" ng-if="p[8].prediction != p[8].actual"
+                                                             class="glyphicon glyphicon-remove"></i>
+                    <label style="margin-left: 5px;">{{ (p[7].accuracy * 100.00).toFixed(1) }}%</label>
+                </td>
+                <td><i style="color: green;" ng-if="p[9].prediction == p[9].actual"
+                       class="glyphicon glyphicon-ok"></i><i style="color: red;" ng-if="p[9].prediction != p[9].actual"
+                                                             class="glyphicon glyphicon-remove"></i>
+                    <label style="margin-left: 5px;">{{ (p[9].accuracy * 100.00).toFixed(1) }}%</label>
+                </td>
+                <td><i style="color: green;" ng-if="p[10].prediction == p[10].actual"
+                       class="glyphicon glyphicon-ok"></i><i style="color: red;"
+                                                             ng-if="p[10].prediction != p[10].actual"
+                                                             class="glyphicon glyphicon-remove"></i>
+                    <label style="margin-left: 5px;">{{ (p[10].accuracy * 100.00).toFixed(1) }}%</label>
+                </td>
+                <td><i style="color: green;" ng-if="p[1].prediction == p[1].actual"
+                       class="glyphicon glyphicon-ok"></i><i style="color: red;" ng-if="p[1].prediction != p[1].actual"
+                                                             class="glyphicon glyphicon-remove"></i>
+                    <label style="margin-left: 5px;">{{ (p[1].accuracy * 100.00).toFixed(1) }}%</label>
+                </td>
+                <td><i style="color: green;" ng-if="p[3].prediction == p[3].actual"
+                       class="glyphicon glyphicon-ok"></i><i style="color: red;" ng-if="p[3].prediction != p[3].actual"
+                                                             class="glyphicon glyphicon-remove"></i>
+                    <label style="margin-left: 5px;">{{ (p[3].accuracy * 100.00).toFixed(1) }}%</label>
+                </td>
+                <td><i style="color: green;" ng-if="p[2].prediction == p[2].actual"
+                       class="glyphicon glyphicon-ok"></i><i style="color: red;" ng-if="p[2].prediction != p[2].actual"
+                                                             class="glyphicon glyphicon-remove"></i>
+                    <label style="margin-left: 5px;">{{ (p[2].accuracy * 100.00).toFixed(1) }}%</label>
+                </td>
+                <td><i style="color: green;" ng-if="p[0].prediction == p[0].actual"
+                       class="glyphicon glyphicon-ok"></i><i style="color: red;" ng-if="p[0].prediction != p[0].actual"
+                                                             class="glyphicon glyphicon-remove"></i>
+                    <label style="margin-left: 5px;">{{ (p[0].accuracy * 100.00).toFixed(1) }}%</label>
+                </td>
+                <td><i style="color: green;" ng-if="p[11].prediction == p[11].actual"
+                       class="glyphicon glyphicon-ok"></i><i style="color: red;"
+                                                             ng-if="p[11].prediction != p[11].actual"
+                                                             class="glyphicon glyphicon-remove"></i>
+                    <label style="margin-left: 5px;">{{ (p[11].accuracy * 100.00).toFixed(1) }}%</label>
+                </td>
+            </tr>
+            </tbody>
+            <div style="margin-left: -30px" class="col-md-12 no-padding">
+                <div class="col-md-8">
+                    <dir-pagination-controls max-size="5" boundary-links="false"
+                                             direction-links="true"></dir-pagination-controls>
+                </div>
+            </div>
+        </table>
+    </div>
+</div>
+<script type="text/javascript" src="data/seasons.js"></script>
+<script type="text/javascript" src="data/groups.js"></script>
+
+<script type="text/javascript" src="data/2011_originaldata.js"></script>
+<script type="text/javascript" src="data/2012_originaldata.js"></script>
+<script type="text/javascript" src="data/2013_originaldata.js"></script>
+<script type="text/javascript" src="data/2014_originaldata.js"></script>
+<script type="text/javascript" src="data/2015_originaldata.js"></script>
+
+<script type="text/javascript" src="data/2011_entire_last_season.js"></script>
+<script type="text/javascript" src="data/2012_entire_last_season.js"></script>
+<script type="text/javascript" src="data/2013_entire_last_season.js"></script>
+<script type="text/javascript" src="data/2014_entire_last_season.js"></script>
+<script type="text/javascript" src="data/2015_entire_last_season.js"></script>
+
+<script type="text/javascript" src="data/2011_injuries_all_last_season.js"></script>
+<script type="text/javascript" src="data/2012_injuries_all_last_season.js"></script>
+<script type="text/javascript" src="data/2013_injuries_all_last_season.js"></script>
+<script type="text/javascript" src="data/2014_injuries_all_last_season.js"></script>
+<script type="text/javascript" src="data/2015_injuries_all_last_season.js"></script>
+
+<script type="text/javascript" src="js/toastr.js"></script>
+<script type="text/javascript" src="js/lodash.js"></script>
+<script type="text/javascript" src="js/angular.js"></script>
+<script type="text/javascript" src="js/angular-route.js"></script>
+<script type="text/javascript" src="js/angular-ui-router.js"></script>
+<script type="text/javascript" src="js/angular-messages.js"></script>
+<script type="text/javascript" src="js/angular-aria.js"></script>
+<script type="text/javascript" src="js/angular-resource.js"></script>
+<script type="text/javascript" src="js/angular-animate.js"></script>
+<script type="text/javascript" src="js/ui-bootstrap-tpls.min.js"></script>
+<script type="text/javascript" src="js/FileSaver.js"></script>
+<script type="text/javascript" src="js/dirPagination.js"></script>
+<!-- Application JS files.-->
+<script type="text/javascript" src="js/app.js"></script>
+<script type="text/javascript" src="js/csvResource.js"></script>
+<script type="text/javascript" src="js/csvCtrl.js"></script>
+</body>
+</html>
