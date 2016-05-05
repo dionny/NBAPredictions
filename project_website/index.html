@@ -122,7 +122,7 @@
 
             <h2 class="featurette-heading">Approach</h2>
 
-            <p class="lead">Our approach consisted in the following steps: collecting metrics, preprocessing the data, and using several classification methods. A considerable amount of time and effort was spent collecting new data for the latest NBA seasons, as well as collecting novel data such as player injury information.</p>
+            <p class="lead">Our approach consisted of the following steps: collecting metrics, preprocessing the data, and using several classification methods. A considerable amount of time and effort was spent collecting new data for the latest NBA seasons, as well as collecting novel data such as player injury information.</p>
             <h3><span class="text-muted">Data Collection</span></h3>
             <p class="lead">Before a strategy for training and testing on classifiers could be devised, the relevant data had to be collected. The official API for raw NBA statistics is not free for developer, so an alternate data source was found at stats.nba.com/stats. It took a considerable amount of time to go over the API and filter out data that was not useful. The resulting data consisted of individual game statistics, information about active teams based on the year and information about individual players. In its original format, there was not much that could be done with the data for machine learning purposes, so other metrics were devised based on what was available.</p>
 
@@ -135,6 +135,14 @@
             <h3><span class="text-muted">Classification and Validation</span></h3>
 
             <p class="lead">In order to predict the outcome of a game, several machine learning algorithms were used: K-Nearest Neighbors, Linear Regression, Support Vector Machines, J48 Decision Tree, Logistic Model Tree, Naive Bayes, AdaBoost, and a custom majority vote ensemble. The performance of each algorithm was measured using 10-fold cross validation, and tuned accordingly.</p>
+
+            <p class="lead">Once each algorithm was appropriately tuned, game prediction was done in one of two ways. In the first approach, each classifier was trained on a subset of the previous NBA season. The more data that was trained on for the current season, the less data was trained on from the prior season. Intuitively, we expected this to be more accurate than always training on the full previous season, which was our second approach. After training on either a subset or the full previous season, the classifiers were also trained with the entire current season prior to the game being predicted. This approach essentially gave us an "online" classifier which allows us to predict NBA games before they even happen. Both models are illustrated below.</p>
+
+            <p class="lead">Training on a partial previous season:</p>
+            <img class="featurette-image img-responsive" src="img/partialPrevSeason.png" width="65%" height="65%">
+            <br><br>
+            <p class="lead">Training on the full previous season:</p>
+            <img class="featurette-image img-responsive" src="img/fullPrevSeason.png" width="65%" height="65%">
         </div>
 
         <hr class="featurette-divider">
@@ -143,16 +151,29 @@
         <div class="featurette" id="results">
             <h2 class="featurette-heading">Results</h2>
 
-            <img class="featurette-image img-responsive" src="./img/results_table.png">
+            <!--<img class="featurette-image img-responsive" src="./img/results_table.png">-->
 
-            <p class="lead">The results of our evaluation will show how the feature extraction methods outlined in the Kolter paper and the family classification methods in the Rieck paper are scaled, and how we replicated and improved upon their results. We had the most success with the accuracy of the SVMs for both the API strings and the n-gram feature sets. The error-rate analysis, AUC, precision and recall had the best results for both of these feature sets.</p>
+            <p class="lead">First, we present the results of training classifiers on a portion of last seasons data to test the new season. For 2011, the best algorithm was the SVM with an accuracy of 65.8%. In 2012 it was the Naive Bayes with an accuracy of 67.2%. In 2013, the best algorithm again was the Naive Bayes with 65.4. In 2014, Linear Regression yielded the best accuracy with 68.3 %. Finally, in 2015 the SVM tied the LMT with an accuracy of 67.4%.</p>
 
-            <img class="featurette-image img-responsive pull-left" src="./img/class_accuracy_api-strings.png">
-            <img class="featurette-image img-responsive pull-left" src="./img/class_accuracy_n-grams.png">
-            <p class="lead">As shown in the figures, the per-class accuracy of both methods was strongest for the linear SVM classifiers as well with the n-gram approach having all around better class accuracy results in general compared to the API strings method. We can attribute these findings to the fact that the API strings are not as unique a feature identifier as the n-grams.</p>
-            <p class="lead">While the Rieck data set is comparable in size to the Microsoft data set, we achieved better accuracy and a better AUC measure. On average Rieck et al were only able to accurately classify 88% of their sample file [15], where we were able to correctly assign 98% to the proper malware family.</p>
+            <img class="featurette-image img-responsive" src="./img/partialPrevResults.png" width="65%" height="65%">
+            <br><br>
+            <img class="featurette-image img-responsive" src="img/partialPreviousGraph.png" width="65%" height="65%">
+
+            <br><br>
+
+            <p class="lead">Next we present the accuracy results when training against the full previous season when predicting each game. In 2011, the ensemble method had the highest accuracy with 65.6%. In 2012, the best classifier was the Naive Bayes with an accuracy of 66.7%. In 2013, K-Nearest Neighbors outperformed others with 65.9% accuracy for both 15 and 40 neighbors respectively. In 2014, both LMT and SVM tied for the best accuracy with 68.2%. Finally, in 2015, Linear Regression was the best algorithm with an accuracy of 68%.</p>
+            <img class="featurette-image img-responsive" src="./img/fullPrevResults.png" width="65%" height="65%">
+            <br><br>
+            <img class="featurette-image img-responsive" src="img/fullPreviousGraph.png" width="65%" height="65%">
+
+            <br><br>
+            <p class="lead">Finally, we present the accuracy results when taking into account player injury data for each game. In 2011, the SVM had the highest accuracy with 65.7%. In 2012, AdaBoost had the highest accuracy with 66.4%. Finally, in 2013, Naive Bayes had the highest accuracy with 65.9%. Here, K-Nearest Neighbors with K = 40 performed better in a single instance than the same algorithm with K = 15.</p>
+            <img class="featurette-image img-responsive" src="./img/injuryData.png" width="65%" height="65%">
+            <br><br>
+            <img class="featurette-image img-responsive" src="img/injuryGraph.png" width="65%" height="65%">
         </div>
 
+        <br><br>
         <p class="lead">All of the results across all used algorithms are available on our <a href="demo/demo.htm">demonstration</a> page.</p>
 
         <hr class="featurette-divider">
@@ -161,7 +182,7 @@
         <div class="featurette" id="conclusions">
          
             <h2 class="featurette-heading">Conclusion</h2>
-            <p class="lead">We presented a methodology for classifying malware binary files into nine families. The initial approach for the project was to extract the API libraries used in each file and make them the features in the classification models. But another approach was taken, using N-grams from the binary files. We described process of extracting N-grams, with n=4, from the executable files, then calculate the information gain (IG) of each of them in order to select the top 500 N-grams with the highest IG. We described how to preprocess the large data set in reasonable time, and how to transform it into .arff format to use it as input in Weka. We used several classifiers (Decision Trees, SVM and Naive Bayes) and compared the results to the ones obtained using API libraries. Our classification algorithms in Weka reached about 98% of accuracy, better than the API libraries. But we proposed in a future work, to use sequential pattern extraction or Markov Model which intuitively should lead to better results. We were able to process such large data set by optimizing the merging of N-grams using a min-heap, but for larger data sets we would recommend a distributed computing approach by using Hadoop or some other tool that facilitates map-reduce. We consider this methodology could be interpreted as a starting point in this topic of classifying malicious software into families, and later evolve into a more complex and robust solution by applying more sophisticated techniques and algorithms.</p>
+            <p class="lead">As explained in the results section, the injury count did not significantly change the performance of the classifiers. One explanation is that the number of injured players does not take into account the importance of the missing players into account. Calculating the importance a single player would involve analyzing their point contribution over the course of their career on their current team. Next, each player on the team would receive an importance score based on how much they contributed in the season relative to their teammates. A simple method would be dividing the contribution of each player by the sum of points scored during the season. Once an importance metric is in place, we can numerically determine how much a team can be affected by missing players as a feature for each team in a match. Unfortunately, we did not have time accomplish this for our current project. However, we have all the data necessary to finish it in the future.</p>
         </div>
 
         <hr class="featurette-divider">
@@ -169,14 +190,21 @@
         <!-- References -->
         <div class="featurette" id="references">
             <h2 class="featurette-heading">References</h2>
-            <p class="lead">Mihai Christodorescu, Somesh Jha, Sanjit A. Seshia, Dawn Song, and Randal E. Bryant. 2005. Semantics-Aware Malware Detection. (2005), 32–46.</p>
-            <p class="lead">William H. Fletcher. 2012. Data mining: Practical machine learning tools and techniques. (2012). http://kwicfinder.com/kfNgram/kfNgramHelp.html</p>
-            <p class="lead">J. Zico Kolter and Marcus A. Maloof. 2006. Learning to Detect and Classify Malicious Executables in the Wild. 7, Article 19 (2006), 2721–2744.</p>
-            <p class="lead">Abdurrahman Pekta, Mehmet Eri, and Tankut Acarman. 2011. Proposal of n-gram Based Algorithm for Malware Classification. (2011).</p>
-            <p class="lead">Ohm Sornil and Chatchai Liangboonprakong. 2013. Malware Classification Using N-grams Sequential Pattern Features. (2013).</p>
-            <p class="lead">I. H. Witten and E. Frank. 2005. Data mining: Practical machine learning tools and techniques. (2005). http://www.cs.waikato.ac.nz/ml/weka/index.html</p>
-            <p class="lead">Y. Yang and J. O. Pederson. 1997. A comparative study on feature selection in text categorization. (1997), 412–420.</p>
-            <p class="lead">N. Zhong, Y. Li, and S. T. Wu. 2012. Effective Pattern Discovery for Text Mining. 24, Issue 1 (2012), 30–44.</p>
+
+            <p class="lead">Renato Amorim Torres. <i>Prediction of NBA games based on Machine Learning Methods.</i> Project report. (2013), <a href="http://homepages.cae.wisc.edu/~ece539/fall13/project/AmorimTorres_rpt.pdf">http://homepages.cae.wisc.edu/~ece539/fall13/project/AmorimTorres_rpt.pdf</a>.</p>
+
+            <p class="lead">Matthew Beckler, Hongfei Wang. <i>NBA Oracle.</i> Project report. (2008), <a href="http://www.mbeckler.org/coursework/2008-2009/10701_report.pdf">http://www.mbeckler.org/coursework/2008-2009/10701_report.pdf</a>.</p>
+
+            <p class="lead">Lori Hoffman, Maria Joseph. <i>A Multivariate Statistical Analysis of the NBA.</i> Project Report. (2003), <a href="http://www.units.miamioh.edu/sumsri/sumj/2003/NBAstats.pdf">http://www.units.miamioh.edu/sumsri/sumj/2003/NBAstats.pdf</a>.</p>
+
+            <p class="lead">I. H. Witten and E. Frank. 2005. <i>Data mining: Practical machine learning tools and techniques.</i> (2005). <a href="http://www.cs.waikato.ac.nz/ml/weka/index.html">http://www.cs.waikato.ac.nz/ml/weka/index.html</a></p>
+
+            <p class="lead">Colet, E. and Parker, J. <i>Advanced Scout: Data mining and knowledge discovery in NBA data.</i> Data Mining and Knowledge Discovery, Vol. 1, Num. 1, 1997, pp 121 – 125.</p>
+            <p class="lead">Orendorff, David, and Johnson, Todd. <i>First-Order Probabilistic Models for Predicting the Winners of
+                Professional Basketball Games.</i> Project report. <a href="http://www.ics.uci.edu/dorendor/basket.pdf">http://www.ics.uci.edu/dorendor/basket.pdf</a></p>
+
+            <p class="lead">Babak, Hamadani. <i>Predicting the outcome of NFL games using machine learning.</i> Project
+                Report for CS229, Stanford University. <a href="http://www.stanford.edu/class/cs229/proj2006/BabakHamadaniPredictingNFLGames.pdf">http://www.stanford.edu/class/cs229/proj2006/BabakHamadaniPredictingNFLGames.pdf</a></p>
         </div>
         
         <!-- Footer -->
